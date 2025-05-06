@@ -230,7 +230,7 @@ const ResourcePlanning = () => {
                 <h3 className="font-medium text-sm">Staff Allocation</h3>
                 <ul className="mt-2 space-y-1 text-sm">
                   <li>• Basic rate: 1 staff per 10 items</li>
-                  <li>• High volume (>100 items): 1 staff per 12 items</li>
+                  <li>• High volume ({">"}100 items): 1 staff per 12 items</li>
                   <li>• Low volume (&lt;20 items): Minimum 1 staff</li>
                   <li>• Festival days: Add 20% more staff</li>
                 </ul>
@@ -240,7 +240,7 @@ const ResourcePlanning = () => {
                 <h3 className="font-medium text-sm">Truck Allocation</h3>
                 <ul className="mt-2 space-y-1 text-sm">
                   <li>• Basic rate: 1 truck per 30 items</li>
-                  <li>• High volume (>100 items): 1 truck per 35 items</li>
+                  <li>• High volume ({">"}100 items): 1 truck per 35 items</li>
                   <li>• Low volume (&lt;20 items): Minimum 1 truck</li>
                   <li>• Large items: May require additional trucks</li>
                 </ul>
