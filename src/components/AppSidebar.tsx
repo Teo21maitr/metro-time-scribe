@@ -18,7 +18,7 @@ import { cn } from "@/lib/utils";
 
 const AppSidebar = () => {
   return (
-    <Sidebar defaultCollapsed={false}>
+    <Sidebar>
       <SidebarHeader className="py-4">
         <div className="flex items-center space-x-2 px-2">
           <div className="flex h-8 w-8 items-center justify-center rounded-full bg-primary">
