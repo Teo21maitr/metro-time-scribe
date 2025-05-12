@@ -2,7 +2,7 @@
 import { useState, useEffect } from "react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
-import { DayData, generateMonthData } from "@/lib/data-service";
+import { DayData, StationData, generateMonthData } from "@/lib/data-service";
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import {
   Select,
@@ -30,6 +30,8 @@ const Calendar = () => {
   const [isLoading, setIsLoading] = useState(true);
   const [selectedDay, setSelectedDay] = useState<DayData | null>(null);
   const [dialogOpen, setDialogOpen] = useState(false);
+  const [stationDialogOpen, setStationDialogOpen] = useState(false);
+  const [selectedStation, setSelectedStation] = useState<StationData | null>(null);
 
   useEffect(() => {
     setIsLoading(true);
@@ -57,6 +59,12 @@ const Calendar = () => {
       setSelectedDay(dayData);
       setDialogOpen(true);
     }
+  };
+
+  // Handle station selection
+  const handleStationClick = (station: StationData) => {
+    setSelectedStation(station);
+    setStationDialogOpen(true);
   };
 
   return (
@@ -194,6 +202,41 @@ const Calendar = () => {
                   </div>
                 </div>
               </div>
+
+              <div className="space-y-2">
+                <h3 className="font-semibold">Station Breakdown</h3>
+                <div className="max-h-60 overflow-y-auto pr-2">
+                  <table className="w-full text-sm">
+                    <thead className="bg-muted">
+                      <tr>
+                        <th className="text-left p-2 rounded-tl-lg">Station</th>
+                        <th className="text-center p-2">Items</th>
+                        <th className="text-center p-2 rounded-tr-lg">Actions</th>
+                      </tr>
+                    </thead>
+                    <tbody className="divide-y">
+                      {selectedDay.stations.map((station) => (
+                        <tr key={station.name} className="hover:bg-muted/50">
+                          <td className="p-2">{station.name}</td>
+                          <td className="p-2 text-center">{station.items}</td>
+                          <td className="p-2 text-center">
+                            <Button 
+                              variant="ghost" 
+                              size="sm"
+                              onClick={(e) => {
+                                e.stopPropagation();
+                                handleStationClick(station);
+                              }}
+                            >
+                              Details
+                            </Button>
+                          </td>
+                        </tr>
+                      ))}
+                    </tbody>
+                  </table>
+                </div>
+              </div>
               
               <div className="space-y-2">
                 <h3 className="font-semibold">Schedule Action</h3>
@@ -212,6 +255,57 @@ const Calendar = () => {
                   </div>
                   <Button>Schedule</Button>
                 </div>
+              </div>
+            </div>
+          )}
+        </DialogContent>
+      </Dialog>
+
+      {/* Station detail dialog */}
+      <Dialog open={stationDialogOpen} onOpenChange={setStationDialogOpen}>
+        <DialogContent className="sm:max-w-[450px]">
+          <DialogHeader>
+            <DialogTitle>
+              {selectedStation?.name}
+            </DialogTitle>
+          </DialogHeader>
+          {selectedStation && (
+            <div className="space-y-4">
+              <div className={`p-4 rounded-lg ${
+                selectedStation.items > 20 ? 'resource-high' : 
+                selectedStation.items > 10 ? 'resource-medium' : 'resource-low'
+              }`}>
+                <h3 className="font-semibold">Station Lost Items</h3>
+                <p className="text-3xl font-bold">{selectedStation.items}</p>
+                <p className="text-sm mt-1">
+                  {selectedStation.items > 20 
+                    ? 'High volume station - prioritize collection' 
+                    : selectedStation.items > 10 
+                      ? 'Medium volume - standard collection schedule' 
+                      : 'Low volume - collect when convenient'}
+                </p>
+              </div>
+              
+              <div className="grid grid-cols-2 gap-4">
+                <div className="p-4 rounded-lg bg-muted">
+                  <h3 className="font-semibold">Staff Required</h3>
+                  <div className="flex items-center gap-2 mt-2">
+                    <Users className="h-5 w-5" />
+                    <p className="text-2xl font-bold">{selectedStation.staffNeeded}</p>
+                  </div>
+                </div>
+                
+                <div className="p-4 rounded-lg bg-muted">
+                  <h3 className="font-semibold">Trucks Required</h3>
+                  <div className="flex items-center gap-2 mt-2">
+                    <Truck className="h-5 w-5" />
+                    <p className="text-2xl font-bold">{selectedStation.trucksNeeded}</p>
+                  </div>
+                </div>
+              </div>
+              
+              <div className="space-y-2">
+                <Button className="w-full">Schedule Collection</Button>
               </div>
             </div>
           )}

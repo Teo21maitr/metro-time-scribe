@@ -2,6 +2,13 @@
 // Mock data for the ChronoScope application
 import { addDays, format, startOfMonth, endOfMonth, eachDayOfInterval, isSameDay } from "date-fns";
 
+export interface StationData {
+  name: string;
+  items: number;
+  staffNeeded: number;
+  trucksNeeded: number;
+}
+
 export interface DayData {
   date: Date;
   items: number;
@@ -9,6 +16,7 @@ export interface DayData {
   trucksNeeded: number;
   notes: string;
   tag: 'low' | 'medium' | 'high';
+  stations: StationData[];
 }
 
 export interface ActionItem {
@@ -20,6 +28,22 @@ export interface ActionItem {
   trucksAssigned: number;
   completed: boolean;
 }
+
+// List of Delhi Metro stations
+export const metroStations = [
+  "VAISHALI", "BRIG. HOSHIAR SINGH", "RITHALA", "KAROL BAGH", 
+  "YASHOBHOOMI DWARKA SECTOR  - 25", "SAMAYPUR BADLI", "KASHMERE GATE", 
+  "IFFCO CHOWK", "DELHI CANTT.", "BOTANICAL GARDEN", "RAJIV CHOWK", 
+  "NEW DELHI (Yellow & Airport Line)", "MANDI HOUSE", "JHILMIL", 
+  "MOOLCHAND", "CHIRAG DELHI", "RAMAKRISHNA ASHRAM MARG", "LAJPAT NAGAR", 
+  "AIIMS", "DELHI AEROCITY", "DWARKA SECTOR - 21", "NOIDA ELECTRONIC CITY",
+  "JAMIA MILLIA ISLAMIA", "SULTANPUR", "AIRPORT (T-3)", "BARAKHAMBA ROAD",
+  "JAMA MASJID", "JANAKPURI EAST", "RAMESH NAGAR", "HARKESH NAGAR OKHLA",
+  "PATEL NAGAR", "LAL QUILA", "CENTRAL SECRETARIAT", "JANPATH",
+  "CHANDNI CHOWK", "MUNDKA", "TILAK NAGAR", "RAJOURI GARDEN",
+  "JAHANGIRPURI", "ADARSH NAGAR"
+  // Only including 40 stations for brevity, in real app would include all stations
+];
 
 // Generate mock data for the month
 export const generateMonthData = (baseDate = new Date()): DayData[] => {
@@ -60,15 +84,54 @@ export const generateMonthData = (baseDate = new Date()): DayData[] => {
     else if (isWeekend) notes = 'Weekend - Above average volume expected';
     else if (isBusyWeekday) notes = 'Busy weekday - Prepare additional staff';
     
+    // Generate station-specific data
+    const stations: StationData[] = generateStationData(items);
+    
     return {
       date,
       items,
       staffNeeded,
       trucksNeeded,
       notes,
-      tag
+      tag,
+      stations
     };
   });
+};
+
+// Generate station-specific data
+const generateStationData = (totalItems: number): StationData[] => {
+  // Select a random number of stations that will have items today (between 10-30 stations)
+  const activeStationCount = Math.min(Math.floor(Math.random() * 20) + 10, metroStations.length);
+  
+  // Create a shuffled copy of the stations array
+  const shuffledStations = [...metroStations].sort(() => Math.random() - 0.5);
+  
+  // Take only the active number of stations
+  const activeStations = shuffledStations.slice(0, activeStationCount);
+  
+  // Distribute total items among active stations
+  let remainingItems = totalItems;
+  
+  return activeStations.map((name, index) => {
+    // For the last station, assign all remaining items
+    if (index === activeStations.length - 1) {
+      const items = remainingItems;
+      const staffNeeded = Math.max(1, Math.ceil(items / 10));
+      const trucksNeeded = Math.max(1, Math.ceil(items / 25));
+      return { name, items, staffNeeded, trucksNeeded };
+    }
+    
+    // For other stations, assign a random portion of remaining items
+    const maxItemsForStation = Math.ceil(remainingItems / (activeStationCount - index) * 1.5);
+    const items = Math.max(1, Math.floor(Math.random() * maxItemsForStation));
+    remainingItems -= items;
+    
+    const staffNeeded = Math.max(1, Math.ceil(items / 10));
+    const trucksNeeded = Math.max(1, Math.ceil(items / 25));
+    
+    return { name, items, staffNeeded, trucksNeeded };
+  }).sort((a, b) => b.items - a.items); // Sort by item count (highest first)
 };
 
 // Generate mock actions
